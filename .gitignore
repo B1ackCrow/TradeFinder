@@ -1,0 +1,11 @@
+.env
+
+postgres/data/
+
+.vscode/
+.idea/
+
+node_modules/
+
+bin/
+obj/
