@@ -13,7 +13,9 @@ CREATE UNIQUE INDEX uq_companies_name ON catalog.companies USING btree (lower(na
 
 create table catalog.company_contact_types (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name text NOT NULL,
+    name_ru text NOT NULL,
+    name_en text NOT NULL,
+    icon_name text NOT NULL,
     
     CONSTRAINT  company_contact_types_pkey PRIMARY KEY (id)
 );
