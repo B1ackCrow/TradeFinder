@@ -1,5 +1,6 @@
 <template>
 <div class="header-component">
+ddddddd
 </div>
 </template>
 
@@ -8,5 +9,8 @@
 </script>
 
 <style scoped>
+.header-component {
+    background: blue;
+}
 
 </style>

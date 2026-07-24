@@ -18,4 +18,8 @@ import CookieComponent from "@/components/global-components/CookieComponent.vue"
 
 </script>
 
-<style scoped></style>
+<style>
+body {
+  background: gray;
+}
+</style> 

@@ -1,5 +1,6 @@
 <template>
   <div class="footer-component">
+  asdasasdasdasdasd
   </div>
 </template>
 
@@ -8,5 +9,7 @@
 </script>
 
 <style scoped>
-
-</style>
+.footer-component {
+  background: white;
+}
+</style> 
