@@ -11,13 +11,6 @@ public class Company
     public List<Product> Products { get; set; }
 }
 
-public class Product
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public string Image { get; set; }
-}
-
 public class Contact
 {
     public Guid Id { get; set; }
