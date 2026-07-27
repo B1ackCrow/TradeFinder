@@ -2,7 +2,7 @@ using Npgsql;
 
 namespace TradeFinder.DataManager;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository : RepositoryBase, IProductRepository
 {
     private readonly ConnectionFactory _connectionFactory;
 
@@ -141,14 +141,6 @@ public class ProductRepository : IProductRepository
         var result = await command.ExecuteScalarAsync();
 
         return (bool)result!;   
-    }
-    
-    
-    protected static string? GetNullableString(NpgsqlDataReader reader, string column)
-    {
-        var ordinal = reader.GetOrdinal(column);
-        
-        return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
     }
     
     private static Product ReadProduct(NpgsqlDataReader reader)

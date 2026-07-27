@@ -1,8 +1,10 @@
 using Dapper;
 using System.Text.Json;
+using Npgsql;
+
 namespace TradeFinder.DataManager;
 
-public class CompanyRepository : ICompanyRepository
+public class CompanyRepository : RepositoryBase, ICompanyRepository
 {
     private readonly ConnectionFactory _connectionFactory;
 
@@ -11,35 +13,78 @@ public class CompanyRepository : ICompanyRepository
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<List<Company>> GetCompanies()
+    public async Task<List<Company>> GetAll()
     {
         const string sql = """
                             SELECT *
                             FROM catalog.vw_companies
                            """;
         
-        using var connection = _connectionFactory.Create();
-        var rows = await connection.QueryAsync<dynamic>(sql);
-        var companies = new List<Company>();
-        foreach (var row in rows)
+        await using var connection = _connectionFactory.Create();
+        await connection.OpenAsync();
+        
+        await using var command = new NpgsqlCommand(sql, connection);
+        await using var reader = await command.ExecuteReaderAsync();
+
+        List<Company> result = [];
+
+        while (await reader.ReadAsync())
         {
-            var company = new Company();
-            company.Id = row.id;
-            company.Name = row.name;
-            company.Description = row.description;
-            // Deserialize JSON columns, default to empty list if null
-            company.Locations = row.locations != null
-                ? JsonSerializer.Deserialize<List<Location>>(row.locations.ToString()) ?? new List<Location>()
-                : new List<Location>();
-            company.Contacts = row.contacts != null
-                ? JsonSerializer.Deserialize<List<Contact>>(row.contacts.ToString()) ?? new List<Contact>()
-                : new List<Contact>();
-            company.Products = row.products != null
-                ? JsonSerializer.Deserialize<List<Product>>(row.products.ToString()) ?? new List<Product>()
-                : new List<Product>();
-            companies.Add(company);
+            result.Add(ReadCompany(reader));
         }
-        return companies;
+        
+        return result;
     }
 
+    
+    public async Task<Company?> GetById(Guid id)
+    {
+        const string sql = """
+                           SELECT *
+                           FROM catalog.vw_companies
+                           WHERE id = @Id;
+                           """;
+
+        await using var connection = _connectionFactory.Create();
+        await connection.OpenAsync();
+
+        await using var command = new NpgsqlCommand(sql, connection);
+
+        command.Parameters.AddWithValue("Id", id);
+
+        await using var reader = await command.ExecuteReaderAsync();
+
+        if (!await reader.ReadAsync())
+            return null;
+
+        return ReadCompany(reader);
+    }
+    
+    private static Company ReadCompany(NpgsqlDataReader reader)
+    {
+        return new Company
+        {
+            Id = reader.GetGuid(reader.GetOrdinal("id")),
+            Name = reader.GetString(reader.GetOrdinal("name")),
+            Description = GetNullableString(reader, "description"),
+            Image = GetNullableString(reader, "image"),
+
+            Locations = DeserializeList<Location>(reader, "locations"),
+            Contacts = DeserializeList<CompanyContact>(reader, "contacts"),
+            Products = DeserializeList<Product>(reader, "products")
+        };
+    }
+    
+    
+    private static List<T> DeserializeList<T>(NpgsqlDataReader reader, string column)
+    {
+        var ordinal = reader.GetOrdinal(column);
+
+        if (reader.IsDBNull(ordinal))
+            return [];
+
+        var json = reader.GetString(ordinal);
+
+        return JsonSerializer.Deserialize<List<T>>(json) ?? [];
+    }
 }
