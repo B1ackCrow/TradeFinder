@@ -1,9 +1,12 @@
 create table location.location_types (
     id uuid default gen_random_uuid() not null,
     name text not null,
+    code text not null,
     
     constraint pkey_location_types primary key (id)
 );
+
+create unique index uq_location_types on location.location_types (code);
 
 create table location.locations (
     id uuid DEFAULT gen_random_uuid() not null,
