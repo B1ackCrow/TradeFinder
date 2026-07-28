@@ -58,28 +58,31 @@ import shieldIcon from '@/assets/icons/footer/shield.svg'
 }
 
 .footer-component {
+   font-family: "Inter", sans-serif;
   display: flex;
   justify-content: space-between;
-  padding: 40px;
-  max-width: 1200px;
+  padding: 60px 100px;
   width: 100%;
-  margin: 0 auto;
+
 }
 
+
 .footer-item {
-  width: 220px;
+  flex: 1;
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
 }
 
 .footer-item h3 {
+  font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 6px 0;
 }
 
 .footer-item p {
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   color: #666;
   line-height: 1.5;
@@ -95,7 +98,6 @@ import shieldIcon from '@/assets/icons/footer/shield.svg'
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 2px;
 }
 
 .footer-item img {
