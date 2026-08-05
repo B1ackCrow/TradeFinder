@@ -75,7 +75,6 @@ public class CompanyRepository : RepositoryBase, ICompanyRepository
         };
     }
     
-    
     private static List<T> DeserializeList<T>(NpgsqlDataReader reader, string column)
     {
         var ordinal = reader.GetOrdinal(column);

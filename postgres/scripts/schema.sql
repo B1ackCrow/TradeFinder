@@ -4,3 +4,4 @@ create schema location;
 
 drop schema catalog cascade ;
 drop schema location cascade ;
+drop schema auth cascade ;

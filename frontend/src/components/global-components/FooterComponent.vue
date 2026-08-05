@@ -1,109 +1,107 @@
 <template>
-<div class="footer-bg">
   <div class="footer-component">
-
     <div class="footer-item">
-      <div class="footer-icon">
-        <img :src="shieldIcon">
+      <div class="item-icon-background">
+        <img class="item-icon" src="@/assets/icons/footer/shield.svg" alt="shield">
       </div>
-      <div>
-        <h3>Проверенные компании</h3>
-        <p>Только надежные поставщики и подрядчики</p>
+      <div class="item-info">
+        <div class="info-title">Проверенные компании</div>
+        <div class="info-text">Только надежные поставщики и подрядчики</div>
       </div>
     </div>
 
     <div class="footer-item">
-      <div class="footer-icon">
-        <img :src="shieldIcon">
+      <div class="item-icon-background">
+        <img class="item-icon" src="@/assets/icons/footer/shield.svg" alt="shield">
       </div>
-      <div>
-        <h3>Удобный поиск</h3>
-        <p>Находите компании и товары быстро и легко</p>
-      </div>
-    </div>
-
-    <div class="footer-item">
-      <div class="footer-icon">
-        <img :src="shieldIcon">
-      </div>
-      <div>
-        <h3>Актуальная информация</h3>
-        <p>Свежие данные о компаниях и их предложениях</p>
+      <div class="item-info">
+        <div class="info-title">Удобный поиск</div>
+        <div class="info-text">Находите компании и товары быстро и легко</div>
       </div>
     </div>
 
     <div class="footer-item">
-      <div class="footer-icon">
-        <img :src="shieldIcon">
+      <div class="item-icon-background">
+        <img class="item-icon" src="@/assets/icons/footer/shield.svg" alt="shield">
       </div>
-      <div>
-        <h3>Поддержка</h3>
-        <p>Поможем найти лучшее решение для вашего проекта</p>
+      <div class="item-info">
+        <div class="info-title">Актуальная информация</div>
+        <div class="info-text">Свежие данные о компаниях и их предложениях</div>
       </div>
     </div>
-     
 
-  </div>
+    <div class="footer-item">
+      <div class="item-icon-background">
+        <img class="item-icon" src="@/assets/icons/footer/shield.svg" alt="shield">
+      </div>
+      <div class="item-info">
+        <div class="info-title">Поддержка</div>
+        <div class="info-text">Поможем найти лучшее решение для вашего проекта</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import shieldIcon from '@/assets/icons/footer/shield.svg'
 </script>
 
 <style scoped>
-.footer-bg {
-  background: #f5f5f5;
-  width: 100%;
-}
-
 .footer-component {
+  background: #ffffff;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
-  padding: 60px 80px;
+  padding: 40px 100px;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
 }
 
+.footer-component:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(200, 200, 200, 0.5);
+}
 
 .footer-item {
-  flex: 1;
-  min-width: 0;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.footer-item h3 {
-  font-family: "Inter", sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 6px 0;
-}
-
-.footer-item p {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.5;
-  margin: 0;
-  word-break: break-word;
-}
-
-.footer-icon {
-  width: 40px;
-  height: 40px;
-  background: white;
-  border-radius: 50%;
+.item-icon-background {
+  background: #f3f4f7;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  border-radius: 50%;
 }
 
-.footer-item img {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
+.item-icon {
+  width: 30px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 250px;
+}
+
+.info-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.info-text {
+  font-size: 14px;
+  font-weight: 300;
+  opacity: 0.8;
 }
 </style>

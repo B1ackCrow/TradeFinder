@@ -17,7 +17,9 @@
 
     <div class="header-right">
       <a href="#">Избранное</a>
-      <a href="#">Войти</a>
+      <router-link to='/authentication/login' class="authentication-href">
+        Войти
+      </router-link>
     </div>
 
   </header>
