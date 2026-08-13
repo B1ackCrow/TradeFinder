@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using TradeFinder.Business.Authentication;
+using TradeFinder.Business.Product;
 using TradeFinder.DataManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,9 +53,12 @@ builder.Services.AddControllers()
 builder.Services.AddSingleton<ConnectionFactory>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddScoped<JwtTokenGenerator>();
+
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<ProductService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 

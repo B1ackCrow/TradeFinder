@@ -14,8 +14,8 @@ public class ProductRepository : RepositoryBase, IProductRepository
     public async Task<Guid> Create(Product product)
     {
         const string sql = """
-                           INSERT INTO catalog.products (name, description, image)
-                           values (@Name, @Description, @Image)
+                           INSERT INTO catalog.products (name, image, parent_product_id)
+                           values (@Name, @Image, @ParentProductId)
                            RETURNING id;
                            """;
         
@@ -25,8 +25,8 @@ public class ProductRepository : RepositoryBase, IProductRepository
         await using var command = new NpgsqlCommand(sql, connection);
         
         command.Parameters.AddWithValue("Name", product.Name);
-        command.Parameters.AddWithValue("Description", (object?)product.Description ?? DBNull.Value);
         command.Parameters.AddWithValue("Image", (object?)product.Image ?? DBNull.Value);
+        command.Parameters.AddWithValue("ParentProductId", (object?)product.ParentProductId ?? DBNull.Value);
         
         return (Guid)(await command.ExecuteScalarAsync())!;
     }
@@ -37,7 +37,6 @@ public class ProductRepository : RepositoryBase, IProductRepository
                             UPDATE catalog.products
                             SET
                                 name = @Name,
-                                description = @Description,
                                 image = @Image
                             WHERE id = @Id;
                            """;
@@ -49,7 +48,6 @@ public class ProductRepository : RepositoryBase, IProductRepository
         
         command.Parameters.AddWithValue("Id", product.Id);
         command.Parameters.AddWithValue("Name", product.Name);
-        command.Parameters.AddWithValue("Description", (object?)product.Description ?? DBNull.Value);
         command.Parameters.AddWithValue("Image", (object?)product.Image ?? DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
@@ -149,8 +147,8 @@ public class ProductRepository : RepositoryBase, IProductRepository
         {
             Id = reader.GetGuid(reader.GetOrdinal("id")),
             Name = reader.GetString(reader.GetOrdinal("name")),
-            Description = GetNullableString(reader, "description"),
-            Image = GetNullableString(reader, "image")
+            Image = GetNullableString(reader, "image"),
+            ParentProductId = GetNullableGuid(reader, "parent_product_id")
         };
     }
 }

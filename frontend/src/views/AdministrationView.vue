@@ -7,7 +7,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import {useProductsStore} from "../store/products.js";
+
+const productStore = useProductsStore();
+
+onMounted(() => {
+  productStore.loadProducts();
+})
 
 import FilterComponent from "@/components/administration/FilterComponent.vue";
 import CompanyFormComponent from "@/components/administration/CompanyFormComponent.vue";

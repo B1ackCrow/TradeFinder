@@ -48,7 +48,7 @@ const selectProduct = () => {
 }
 
 .select-form-button {
-  border-radius: 0;
+  border-radius: 5px 5px 0 0;
   background-color: #ffffff;
   border: none;
   cursor: pointer;
