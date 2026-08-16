@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { getAllProducts, createNewProduct, getCurrentProduct } from '@/api/products';
+import {getAllProducts, createNewProduct, getProductById, updateProductApi} from '@/api/products';
 
 export const useProductsStore = defineStore('products', () => {
 
     const products = ref([]);
-    const currentProduct = ref(null)
-    const currentProductId = ref(null)
 
     //Получает всю продукцию
     const loadProducts = async () => {
@@ -18,21 +16,26 @@ export const useProductsStore = defineStore('products', () => {
     //Создает продукт
     const createProduct = async (product) => {
         const response = await createNewProduct(product);
-        currentProductId.value = response.data;
+
+        return response.data;
     };
 
     //Получает продукт по Id
     const getProduct = async (productId) => {
-        const response = await getCurrentProduct(productId);
-        currentProduct.value = response.data;
+        const response = await getProductById(productId);
+
+        return response.data;
+    }
+
+    const updateProduct = async (product) => {
+        await updateProductApi(product);
     }
 
     return {
-        currentProduct,
-        currentProductId,
         products,
         loadProducts,
         createProduct,
-        getProduct
+        getProduct,
+        updateProduct
     };
 });

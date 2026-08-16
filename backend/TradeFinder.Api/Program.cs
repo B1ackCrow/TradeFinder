@@ -113,6 +113,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseStaticFiles();
+
 try
 {
     Log.Information("Starting application");

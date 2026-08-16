@@ -32,13 +32,41 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [HttpGet("get-by-id")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            GetProductByIdResponse product = await _productService.GetProductById(id);
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
     [HttpPost("create")]
-    public async Task<IActionResult> Create(CreateProductRequest request)
+    public async Task<IActionResult> Create([FromForm] CreateProductRequest request)
     {
         try
         {
             Guid id = await _productService.CreateProduct(request.Name, request.Image, request.ParentProductId);
             return Ok(id);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpPost("update")]
+    public async Task<IActionResult> Update([FromForm] UpdateProductRequest request)
+    {
+        try
+        {
+            await _productService.UpdateProduct(request.Id, request.Name, request.Image, request.ParentProductId);
+            return Ok();
         }
         catch (Exception ex)
         {

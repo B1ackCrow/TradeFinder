@@ -1,27 +1,42 @@
 <template>
 <div class="administration-view">
-  <filter-component class="filter-component surface" v-model="selectedForm"/>
-  <company-form-component class="form-component surface" v-if="selectedForm === 'company'"/>
-  <product-from-component class="form-component surface" v-if="selectedForm === 'product'"/>
+  <filter-component
+      class="filter-component surface"
+      v-model="selectedForm"
+      v-model:selected-product-id="selectedProductId"
+  />
+  <company-form-component
+      class="form-component surface"
+      v-if="selectedForm === 'company'"
+  />
+  <product-form-component
+      class="form-component surface"
+      v-if="selectedForm === 'product'"
+      v-model:selected-product-id="selectedProductId"
+  />
 </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import {useProductsStore} from "../store/products.js";
-
-const productStore = useProductsStore();
-
-onMounted(() => {
-  productStore.loadProducts();
-})
 
 import FilterComponent from "@/components/administration/FilterComponent.vue";
 import CompanyFormComponent from "@/components/administration/CompanyFormComponent.vue";
-import ProductFromComponent from "@/components/administration/ProductFromComponent.vue";
+import ProductFormComponent from "@/components/administration/ProductFormComponent.vue";
+
+const productStore = useProductsStore();
 
 const selectedForm = ref("company");
+const selectedProductId = ref(null);
 
+onMounted(() => {
+  productStore.loadProducts();
+});
+
+watch(selectedProductId, (id) => {
+  console.log("Выбран продукт:", id);
+})
 </script>
 
 <style scoped>

@@ -37,7 +37,8 @@ public class ProductRepository : RepositoryBase, IProductRepository
                             UPDATE catalog.products
                             SET
                                 name = @Name,
-                                image = @Image
+                                image = @Image,
+                                parent_product_id = @ParentProductId
                             WHERE id = @Id;
                            """;
         
@@ -49,6 +50,7 @@ public class ProductRepository : RepositoryBase, IProductRepository
         command.Parameters.AddWithValue("Id", product.Id);
         command.Parameters.AddWithValue("Name", product.Name);
         command.Parameters.AddWithValue("Image", (object?)product.Image ?? DBNull.Value);
+        command.Parameters.AddWithValue("ParentProductId", (object?)product.ParentProductId ?? DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
     }

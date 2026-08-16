@@ -3,26 +3,11 @@
   <div class="product-form-component__body">
 
     <label class="product-image">
-      <input
-          type="file"
-          hidden
-          accept="image/*"
-          @change="handleImageChange"
-      >
-
-      <img
-          v-if="imagePreview"
-          :src="imagePreview"
-          alt="Изображение продукта"
-          class="product-image__preview"
-      >
-
-      <span
-          v-else
-          class="product-image-placeholder"
-      >
-    Выберите изображение
-  </span>
+      <input type="file" hidden accept="image/*" @change="handleImageChange">
+      <img v-if="imagePreview" :src="imagePreview" alt="Изображение продукта" class="product-image__preview">
+      <span v-else class="product-image-placeholder">
+        Выберите изображение
+      </span>
     </label>
 
     <div class="product-settings">
@@ -31,7 +16,10 @@
 
     <div class="product-settings">
       <div class="selected-category-name" :class="{ 'selected-category-name--placeholder': !selectedCategory }">
-        {{ selectedCategory?.name || 'Категория' }}
+        <div class="selected-category-name-text">
+          {{ selectedCategory?.name || 'Категория' }}
+        </div>
+        <button @click="clearSelectedCategory" v-if="selectedCategory" class="delete-selected-category-name">@</button>
       </div>
       <AppTreeSelector class="app-tree-selector surface" :items="categories" v-model="selectedCategoryId"/>
     </div>
@@ -46,42 +34,65 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import {useProductsStore} from '@/store/products';
+import { storeToRefs } from 'pinia';
 
 import AppTreeSelector from "@/components/ui/AppTreeSelector.vue";
 
-let selectedCategoryId = ref(null);
-
+const selectedCategoryId = ref(null);
 const imageFile = ref(null);
 const imagePreview = ref(null);
 
-const productsStore = useProductsStore();
-
-const categories = productsStore.products;
-console.log(categories);
-
-let productName = ref('');
-
+const productName = ref('');
 const error = ref("");
 const success = ref("");
+
+const productsStore = useProductsStore();
+const { products: categories } = storeToRefs(productsStore);
+
+const selectedProductId = defineModel("selectedProductId");
+
+const clearSelectedCategory = () => {
+  selectedCategoryId.value = null;
+}
+
 const saveProduct = async () => {
-  const product = {
-    name: productName,
-    image: null,
-    parentProductId: selectedCategoryId
-  };
+  error.value = "";
+  success.value = "";
+
+  if(productName.value === "" || productName.value <= 0) {
+    error.value = "Заполните поле имени продукта";
+    return;
+  }
+
+  if(selectedProductId.value === selectedCategoryId.value) {
+    error.value = "Категория не может ссылаться на саму себя"
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("Name", productName.value.trim());
+
+  if (selectedCategoryId.value) {
+    formData.append("ParentProductId", selectedCategoryId.value);
+  }
+
+  if (imageFile.value) {
+    formData.append("Image", imageFile.value);
+  }
 
   try {
-    const response = await productsStore.createProduct();
-    const selectedProduct = await productsStore.getProduct(response.data);
-
+    if(selectedProductId.value) {
+      formData.append("Id", selectedProductId.value);
+      await productsStore.updateProduct(formData);
+    }
+    else {
+      selectedProductId.value = await productsStore.createProduct(formData);
+    }
     await productsStore.loadProducts();
-
-    productName = selectedProduct?.response.name;
-    selectedCategoryId = selectedProduct?.response.parentProductId;
-
-    success.value = "Сохранено успешно";
+    success.value = "Сохранено";
   }
   catch (err) {
     if(err.response) {
@@ -90,9 +101,6 @@ const saveProduct = async () => {
       error.value = 'Не удалось подключиться к серверу'
     }
   }
-
-
-
 }
 
 const handleImageChange = (event) => {
@@ -103,10 +111,19 @@ const handleImageChange = (event) => {
   }
 
   if (!file.type.startsWith('image/')) {
+    error.value = "Можно загружать только изображения";
     return;
   }
 
-  if (imagePreview.value) {
+  const maxFileSize = 10 * 1024 * 1024;
+
+  if (file.size > maxFileSize) {
+    error.value = "Размер изображения не должен превышать 10 МБ";
+    event.target.value = "";
+    return;
+  }
+
+  if (imagePreview.value?.startsWith("blob:")) {
     URL.revokeObjectURL(imagePreview.value);
   }
 
@@ -133,13 +150,27 @@ const findCategory = (items, id) => {
 };
 
 const selectedCategory = computed(() => {
-  return findCategory(categories, selectedCategoryId.value);
+  return findCategory(categories.value, selectedCategoryId.value);
 });
 
 onBeforeUnmount(() => {
   if (imagePreview.value) {
     URL.revokeObjectURL(imagePreview.value);
   }
+});
+
+watch(selectedProductId, async (id) => {
+  if (!id) {
+    return;
+  }
+
+  const product = await productsStore.getProduct(id);
+
+  productName.value = product.name;
+  selectedCategoryId.value = product.parentId;
+
+  imageFile.value = null;
+  imagePreview.value = product.image ? `http://localhost:5185${product.image}` : null;
 });
 
 </script>
@@ -242,6 +273,20 @@ onBeforeUnmount(() => {
 
   font-size: 15px;
   font-weight: 300;
+}
+
+.delete-selected-category-name {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.delete-selected-category-name:hover {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 1;
 }
 
 .selected-category-name--placeholder {

@@ -5,13 +5,28 @@
     <button @click="selectProduct" class="select-form-button" :class="{ active: selectedType === 'product' }">Продукция</button>
   </div>
   <div class="filter-component__body">
-
+    <app-tree-selector
+        :items="categories"
+        v-model="selectedProductId"
+        v-if="selectedType === 'product'"
+    />
+  </div>
+  <div class="filter-component__footer">
+    <button @click="createNewProduct" class="filled-button">+ Создать новую категорию</button>
   </div>
 </div>
 </template>
 
 <script setup>
+import {useProductsStore} from "@/store/products.js";
+import AppTreeSelector from "@/components/ui/AppTreeSelector.vue";
+import {storeToRefs} from "pinia";
+
+const productsStore = useProductsStore();
+const { products: categories } = storeToRefs(productsStore);
+
 const selectedType = defineModel()
+const selectedProductId = defineModel("selectedProductId");
 
 const selectCompany = () => {
   selectedType.value = "company"
@@ -24,7 +39,6 @@ const selectProduct = () => {
 
 <style scoped>
 .filter-component {
-  padding: 0 20px 0 20px;
   display: flex;
   flex-direction: column;
 }
@@ -62,6 +76,25 @@ const selectProduct = () => {
 .select-form-button.active {
   opacity: 0.9;
   color: #1460ca;
+}
+
+.filter-component__body {
+  flex: 1;
+  padding: 10px;
+
+  overflow: auto;
+}
+
+.filter-component__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  width: 100%;
+}
+
+.filled-button {
+  border-radius: 0 0 5px 5px;
 }
 
 </style>
