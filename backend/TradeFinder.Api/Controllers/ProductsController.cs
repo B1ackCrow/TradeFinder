@@ -17,6 +17,20 @@ public class ProductsController : ControllerBase
         _logger = logger;
         _productService = productService;
     }
+
+    [HttpPost("import-from-json")]
+    public async Task<IActionResult> ImportFromJson(string filePath)
+    {
+        try
+        {
+            await _productService.ImportFromJson(filePath);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     
     [HttpGet("get-all")]
     public async Task<IActionResult> GetAll()

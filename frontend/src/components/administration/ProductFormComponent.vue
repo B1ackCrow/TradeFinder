@@ -2,13 +2,13 @@
 <div class="product-form-component">
   <div class="product-form-component__body">
 
-    <label class="product-image">
-      <input type="file" hidden accept="image/*" @change="handleImageChange">
-      <img v-if="imagePreview" :src="imagePreview" alt="Изображение продукта" class="product-image__preview">
-      <span v-else class="product-image-placeholder">
-        Выберите изображение
-      </span>
-    </label>
+    <AppImageInput
+        v-model="imageFile"
+        :image-url="imagePreview"
+        placeholder="Выберите изображение логотипа"
+        alt="Изображение продукта"
+        @error="error = $event"
+    />
 
     <div class="product-settings">
       <input type="text" v-model="productName" placeholder="Название продукта" class="input-form"/>
@@ -39,6 +39,7 @@ import {useProductsStore} from '@/store/products';
 import { storeToRefs } from 'pinia';
 
 import AppTreeSelector from "@/components/ui/AppTreeSelector.vue";
+import AppImageInput from "@/components/ui/AppImageInput.vue";
 
 const selectedCategoryId = ref(null);
 const imageFile = ref(null);
@@ -103,34 +104,6 @@ const saveProduct = async () => {
   }
 }
 
-const handleImageChange = (event) => {
-  const file = event.target.files?.[0];
-
-  if (!file) {
-    return;
-  }
-
-  if (!file.type.startsWith('image/')) {
-    error.value = "Можно загружать только изображения";
-    return;
-  }
-
-  const maxFileSize = 10 * 1024 * 1024;
-
-  if (file.size > maxFileSize) {
-    error.value = "Размер изображения не должен превышать 10 МБ";
-    event.target.value = "";
-    return;
-  }
-
-  if (imagePreview.value?.startsWith("blob:")) {
-    URL.revokeObjectURL(imagePreview.value);
-  }
-
-  imageFile.value = file;
-  imagePreview.value = URL.createObjectURL(file);
-};
-
 const findCategory = (items, id) => {
   for (const item of items) {
     if (item.id === id) {
@@ -160,7 +133,20 @@ onBeforeUnmount(() => {
 });
 
 watch(selectedProductId, async (id) => {
+  error.value = "";
+  success.value = "";
+
   if (!id) {
+    productName.value = "";
+    selectedCategoryId.value = null;
+    imageFile.value = null;
+
+    if (imagePreview.value?.startsWith("blob:")) { {
+      URL.revokeObjectURL(imagePreview.value);}
+    }
+
+    imagePreview.value = null;
+
     return;
   }
 
@@ -187,37 +173,6 @@ watch(selectedProductId, async (id) => {
   display: flex;
   gap: 20px;
   width: 100%;
-}
-
-.product-image {
-  width: 250px;
-  height: 250px;
-
-  border-radius: 5px;
-  border: 1px solid rgba(200, 200, 200, 0.5);
-
-  cursor: pointer;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.product-image-placeholder {
-  opacity: 0.4;
-  font-weight: 200;
-  font-size: 14px;
-}
-
-.product-image__preview {
-  width: 100%;
-  height: 100%;
-
-  object-fit: cover;
-  display: block;
 }
 
 .product-form-component__footer {

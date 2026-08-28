@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using SkiaSharp;
 using TradeFinder.Contracts.Product;
 using TradeFinder.DataManager;
+using System.Text.Json;
+
 
 namespace TradeFinder.Business.Product;
 
@@ -16,7 +18,159 @@ public class ProductService
         _productRepository = productRepository;
         _environment = environment;
     }
+    
+    public async Task ImportFromJson(string filePath)
+    {
+        string json = await File.ReadAllTextAsync(filePath);
 
+        using JsonDocument document = JsonDocument.Parse(json);
+
+        Guid? currentBookId = null;
+        Guid? currentPartId = null;
+        Guid? currentSectionId = null;
+        Guid? currentGroupId = null;
+        Guid? currentPositionItemId = null;
+
+        foreach (JsonElement item in document.RootElement.EnumerateArray())
+        {
+            string okpd2 = GetOkpd2(item);
+
+            string book = GetValue(item, "book");
+            string part = GetValue(item, "part");
+            string section = GetValue(item, "section");
+            string group = GetValue(item, "group");
+            string positionItem = GetValue(item, "position_item");
+            string classifierItem = GetValue(item, "classifier_item");
+
+            string name = GetValue(item, "name");
+            string unit = GetValue(item, "unit of measure");
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            string? classifierCode;
+            Guid? parentId;
+
+            if (!string.IsNullOrWhiteSpace(book))
+            {
+                classifierCode = book;
+                parentId = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(part))
+            {
+                classifierCode = part;
+                parentId = currentBookId;
+            }
+            else if (!string.IsNullOrWhiteSpace(section))
+            {
+                classifierCode = section;
+                parentId = currentPartId;
+            }
+            else if (!string.IsNullOrWhiteSpace(group))
+            {
+                classifierCode = group;
+                parentId = currentSectionId;
+            }
+            else if (!string.IsNullOrWhiteSpace(positionItem))
+            {
+                classifierCode = positionItem;
+                parentId = currentGroupId;
+            }
+            else if (!string.IsNullOrWhiteSpace(classifierItem))
+            {
+                classifierCode = classifierItem;
+                parentId = currentPositionItemId;
+            }
+            else
+            {
+                continue;
+            }
+
+            DataManager.Product product = new()
+            {
+                Name = name,
+                Image = null,
+                Okpd2Code = string.IsNullOrWhiteSpace(okpd2)
+                    ? null
+                    : okpd2,
+
+                ClassifierCode = classifierCode,
+
+                Unit = string.IsNullOrWhiteSpace(unit)
+                    ? null
+                    : unit,
+
+                ParentProductId = parentId
+            };
+
+            Guid productId = await _productRepository.Create(product);
+
+            if (!string.IsNullOrWhiteSpace(book))
+            {
+                currentBookId = productId;
+
+                currentPartId = null;
+                currentSectionId = null;
+                currentGroupId = null;
+                currentPositionItemId = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(part))
+            {
+                currentPartId = productId;
+
+                currentSectionId = null;
+                currentGroupId = null;
+                currentPositionItemId = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(section))
+            {
+                currentSectionId = productId;
+
+                currentGroupId = null;
+                currentPositionItemId = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(group))
+            {
+                currentGroupId = productId;
+
+                currentPositionItemId = null;
+            }
+            else if (!string.IsNullOrWhiteSpace(positionItem))
+            {
+                currentPositionItemId = productId;
+            }
+        }
+    }
+
+    private static string GetValue(JsonElement item, string propertyName)
+    {
+        if (!item.TryGetProperty(
+                propertyName,
+                out JsonElement property))
+        {
+            return "";
+        }
+
+        return property.GetString()?.Trim() ?? "";
+    }
+
+    private static string GetOkpd2(JsonElement item)
+    {
+        foreach (JsonProperty property in item.EnumerateObject())
+        {
+            if (property.Name.Contains(
+                    "OKPD2",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return property.Value.GetString()?.Trim() ?? "";
+            }
+        }
+
+        return "";
+    }
+    
     public async Task UpdateProduct(
         Guid id,
         string name,

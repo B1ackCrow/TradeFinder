@@ -51,6 +51,10 @@ create table catalog.products (
     constraint fkey_products_parent_id foreign key (parent_product_id) references catalog.products(id) on delete restrict 
 );
 create index idx_products_parent on catalog.products(parent_product_id);
+ALTER TABLE catalog.products
+    ADD COLUMN okpd2_code text NULL,
+    ADD COLUMN classifier_code text NULL,
+    ADD COLUMN unit text NULL;
 
 
 create table catalog.company_products (
@@ -64,4 +68,8 @@ create table catalog.company_products (
 );
 create index idx_company_products_company_id on catalog.company_products(company_id);
 create index idx_company_products_product_id on catalog.company_products(product_id);
+CREATE UNIQUE INDEX uq_company_products
+    ON catalog.company_products (company_id, product_id);
 
+alter table catalog.company_products
+alter column id set default gen_random_uuid();

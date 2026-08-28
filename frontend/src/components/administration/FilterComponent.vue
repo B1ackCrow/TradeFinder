@@ -10,6 +10,10 @@
         v-model="selectedProductId"
         v-if="selectedType === 'product'"
     />
+    <app-tree-selector
+        :items="companies"
+        v-model="selectedCompanyId"
+        v-if="selectedType === 'company'"></app-tree-selector>
   </div>
   <div class="filter-component__footer">
     <button @click="createNewProduct" class="filled-button">+ Создать новую категорию</button>
@@ -34,6 +38,10 @@ const selectCompany = () => {
 
 const selectProduct = () => {
   selectedType.value = "product"
+}
+
+const createNewProduct = () => {
+  selectedProductId.value = null;
 }
 </script>
 
